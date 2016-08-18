@@ -14,6 +14,7 @@ class LogDataTest extends Sugar_PHPUnit_Framework_TestCase {
     private $bean; //Accounts bean
     private $hooks; //Hooks class
     private $rel_arr;
+    private $school;
     /**
      * Set up before each test
      */
@@ -31,9 +32,10 @@ class LogDataTest extends Sugar_PHPUnit_Framework_TestCase {
         $this->bean->id = '8a77114c-c768-71ca-2305-57ac0055e914';
         $this->bean->last_name = 'qwe';
 
-        $schoo = $this->getMockBuilder(sch_schools::class)->getMock();
+        $this->school = $this->getMockBuilder(sch_schools::class)->setMethods(['testDependency'])->getMock();
+
         $this->rel_arr = array();
-        foreach ($schoo->field_defs as $field => $def) {
+        foreach ($this->school->field_defs as $field => $def) {
             if (isset($def['relationship'])) {
                 //return(array($def['name']));
                 $this->rel_arr[] = $def['relationship'];
@@ -47,6 +49,10 @@ class LogDataTest extends Sugar_PHPUnit_Framework_TestCase {
              */
             // SugarTestHelper::setUp("beanList");
         }
+        
+        $dep_arr = array('teacher_role');
+        $this->school->method('testDependency')->willReturn($dep_arr);
+        
        // $GLOBALS['log']->fatal(print_r($schoo, true));
     }
 
@@ -80,4 +86,8 @@ class LogDataTest extends Sugar_PHPUnit_Framework_TestCase {
          $this->assertContains('sch_staff_sch_schools',$this->rel_arr);
     }
 
+    public function testDependency(){
+        
+         $this->assertContains('teacher_role',$this->school->testDependency());
+    }
 }
