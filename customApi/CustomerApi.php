@@ -24,7 +24,7 @@ class CustomerApi extends SugarApi {
     }
 
     public function getCustomerInfo($api, $args) {
-        
+
         //return $this->withSugarQuery();
         return $this->withBean();
     }
@@ -154,6 +154,7 @@ class CustomerApi extends SugarApi {
     public function withBean() {
         // with sugar bean
 
+
         $json_arr = array();
 
         $targetBean = BeanFactory::newBean('Prospects');
@@ -161,27 +162,48 @@ class CustomerApi extends SugarApi {
 
         $target_leads = new SplFixedArray(count($targets_arr));
         $target_lead_contact = new SplFixedArray(count($targets_arr));
+
+        //   if($targets_arr[$i]->load_relationship('lead'))
+
+
         for ($i = 0; $i < count($targets_arr); $i++) {
             $json_obj = array();
 
             $json_obj['target_id'] = $targets_arr[$i]->id;
             $json_obj['target_name'] = $targets_arr[$i]->name;
-            if ($targets_arr[$i]->lead_id != null) {
 
-                $leadBean = BeanFactory::retrieveBean('Leads', $targets_arr[$i]->lead_id, array('disable_row_level_security' => true));
+
+
+            if ($targets_arr[$i]->lead_id != null) {
+                $targets_arr[$i]->load_relationship('lead');
+                $leadBean = $targets_arr[$i]->lead->getBeans();
+
+                $leadBean = array_values($leadBean)[0];
+                //$leadBean = BeanFactory::retrieveBean('Leads', $targets_arr[$i]->lead_id, array('disable_row_level_security' => true));
                 $leadBeanData = array('id' => $leadBean->id, 'name' => $leadBean->name, 'opportunity_id' => $leadBean->opportunity_id, 'contact_id' => $leadBean->contact_id, 'account_id' => $leadBean->account_id);
                 $target_leads[$i] = $leadBeanData;
+
                 $json_obj['converted'] = true;
                 $json_obj['lead_id'] = $target_leads[$i]['id'];
                 $json_obj['lead_name'] = $target_leads[$i]['name'];
 
+
                 if ($target_leads[$i]['contact_id'] != null) {
+                    // $bean = BeanFactory::retrieveBean('Leads', $target_leads[$i]->id, array('disable_row_level_security' => true));
+                    //$bean->load_relationship('contacts');
+                    //$contactBean = $bean->contacts->getBeans();
+                    //$GLOBALS['log']->fatal(print_r($contactBean,true));
+                    // return;
+                    // if(count($contactBean)>0){
+                    // $contactBean = array_values($contactBean)[0];
 
                     $json_obj['contact_id'] = $target_leads[$i]['contact_id'];
                     $contactBean = BeanFactory::retrieveBean('Contacts', $target_leads[$i]['contact_id'], array('disable_row_level_security' => true));
                     $json_obj['contact_name'] = $contactBean->name;
+
                     $contactBeanData = array('id' => $contactBean->id, 'name' => $contactBean->name);
                     $target_lead_contact[$i] = $contactBeanData;
+                    //}
                 }
                 if ($target_leads[$i]['opportunity_id'] != null) {
 
@@ -226,12 +248,16 @@ class CustomerApi extends SugarApi {
             $json_obj = array();
             $json_obj['lead_id'] = $leads_arr[$i]['id'];
             $json_obj['lead_name'] = $leads_arr[$i]['name'];
-
+            $b = BeanFactory::retrieveBean('Leads', $leads_arr[$i]['id'], array('disable_row_level_security' => true));
             if ($leads_arr[$i]['contact_id'] != null || $leads_arr[$i]['contact_id'] != "") {
 
                 $json_obj['converted'] = true;
                 $json_obj['contact_id'] = $leads_arr[$i]['contact_id'];
-                $contactBean = BeanFactory::retrieveBean('Contacts', $leads_arr[$i]['contact_id'], array('disable_row_level_security' => true));
+
+                $b->load_relationship('contacts');
+                $contactBean = $b->contacts->getBeans();
+                $contactBean = array_values($contactBean)[0];
+                // $contactBean = BeanFactory::retrieveBean('Contacts', $leads_arr[$i]['contact_id'], array('disable_row_level_security' => true));
                 $json_obj['contact_name'] = $contactBean->name;
                 $contactBeanData = array('id' => $contactBean->id, 'name' => $contactBean->name);
 
@@ -243,13 +269,21 @@ class CustomerApi extends SugarApi {
 
 
                 $json_obj['opportunity_id'] = $leads_arr[$i]['opportunity_id'];
-                $oppBean = BeanFactory::retrieveBean('Opportunities', $leads_arr[$i]['opportunity_id'], array('disable_row_level_security' => true));
+                //  $b = BeanFactory::retrieveBean('Leads',$leads_arr[$i]['id'],array('disable_row_level_security' => true));
+                $b->load_relationship('opportunity');
+                $oppBean = $b->opportunity->getBeans();
+                $oppBean = array_values($oppBean)[0];
+                // $oppBean = BeanFactory::retrieveBean('Opportunities', $leads_arr[$i]['opportunity_id'], array('disable_row_level_security' => true));
                 $json_obj['opportunity_name'] = $oppBean->name;
             }
             if ($leads_arr[$i]['account_id'] != null || $leads_arr[$i]['account_id'] != "") {
 
                 $json_obj['account_id'] = $leads_arr[$i]['account_id'];
-                $accountBean = BeanFactory::retrieveBean('Accounts', $leads_arr[$i]['account_id'], array('disable_row_level_security' => true));
+                // $b = BeanFactory::retrieveBean('Leads',$leads_arr[$i]['id'],array('disable_row_level_security' => true));
+                $b->load_relationship('accounts');
+                $accountBean = $b->accounts->getBeans();
+                $accountBean = array_values($accountBean)[0];
+                //  $accountBean = BeanFactory::retrieveBean('Accounts', $leads_arr[$i]['account_id'], array('disable_row_level_security' => true));
                 $json_obj['account_name'] = $accountBean->name;
             }
             $json_arr[] = $json_obj;
