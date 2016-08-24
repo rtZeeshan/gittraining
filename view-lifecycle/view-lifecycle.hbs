@@ -1,0 +1,35 @@
+ <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+
+        }
+        th, td {
+            padding: 15px;
+        }
+        td {text-align:center}
+        tr:nth-of-type(odd) {
+          background-color:#ccc;
+        }
+    </style>
+
+<div class = "row">
+<ul>
+<table>
+<tr>
+<th>Target</th> <th>Lead</th> <th>Opportunity</th> <th>Contact</th> <th>Account</th>
+</tr>
+
+{{#each cust}}
+    <tr>
+        <td>{{#if this.target_id}} {{this.target_name}} {{/if}}</td>
+        <td>{{#if this.lead_id}} {{this.lead_name}} {{/if}}</td>
+        <td>{{#if this.opportunity_id}} {{this.opportunity_name}} {{/if}}</td>
+        <td>{{#if this.contact_id}} {{this.contact_name}} {{/if}}</td>
+        <td>{{#if this.account_id}} {{this.account_name}} {{/if}}</td>
+    </tr>
+{{/each}}
+
+</table>
+</ul>
+</div>
