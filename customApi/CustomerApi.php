@@ -154,7 +154,7 @@ class CustomerApi extends SugarApi {
     public function withBean() {
         // with sugar bean
 
-
+        $opportunities_array = array();
         $json_arr = array();
 
         $targetBean = BeanFactory::newBean('Prospects');
@@ -189,6 +189,9 @@ class CustomerApi extends SugarApi {
 
 
                 if ($target_leads[$i]['contact_id'] != null) {
+                    $leadBean->load_relationship('contacts');
+                    $contactBean = $leadBean->contacts->getBeans();
+                    $contactBean = array_values($contactBean)[0];
                     // $bean = BeanFactory::retrieveBean('Leads', $target_leads[$i]->id, array('disable_row_level_security' => true));
                     //$bean->load_relationship('contacts');
                     //$contactBean = $bean->contacts->getBeans();
@@ -198,7 +201,7 @@ class CustomerApi extends SugarApi {
                     // $contactBean = array_values($contactBean)[0];
 
                     $json_obj['contact_id'] = $target_leads[$i]['contact_id'];
-                    $contactBean = BeanFactory::retrieveBean('Contacts', $target_leads[$i]['contact_id'], array('disable_row_level_security' => true));
+                    //$contactBean = BeanFactory::retrieveBean('Contacts', $target_leads[$i]['contact_id'], array('disable_row_level_security' => true));
                     $json_obj['contact_name'] = $contactBean->name;
 
                     $contactBeanData = array('id' => $contactBean->id, 'name' => $contactBean->name);
@@ -210,6 +213,7 @@ class CustomerApi extends SugarApi {
                     $json_obj['opportunity_id'] = $target_leads[$i]['opportunity_id'];
                     $oppBean = BeanFactory::retrieveBean('Opportunities', $target_leads[$i]['opportunity_id'], array('disable_row_level_security' => true));
                     $json_obj['opportunity_name'] = $oppBean->name;
+                    $opportunities_array[] = $oppBean->id;
                 }
 
                 if ($target_leads[$i]['account_id'] != null) {
@@ -275,6 +279,7 @@ class CustomerApi extends SugarApi {
                 $oppBean = array_values($oppBean)[0];
                 // $oppBean = BeanFactory::retrieveBean('Opportunities', $leads_arr[$i]['opportunity_id'], array('disable_row_level_security' => true));
                 $json_obj['opportunity_name'] = $oppBean->name;
+                $opportunities_array[] = $oppBean->id;
             }
             if ($leads_arr[$i]['account_id'] != null || $leads_arr[$i]['account_id'] != "") {
 
@@ -313,6 +318,45 @@ class CustomerApi extends SugarApi {
             $json_obj['contact_name'] = $contacts_arr[$i]['name'];
 
             $json_arr[] = $json_obj;
+        }
+
+        $opps_arr = array();
+        $oppoBean = BeanFactory::newBean('Opportunities');
+        $resOppo = $oppoBean->get_full_list();
+        for ($i = 0; $i < count($resOppo); $i++) {
+
+            if (in_array($resOppo[$i]->id, $opportunities_array)) {
+               
+            }
+            else{
+                $opps_arr[] = $resOppo[$i];
+            }
+        }
+        //return count($opps_arr);
+        for($i = 0; $i<count($opps_arr);$i++){
+            $json_obj = array();
+            $json_obj['opportunity_id'] = $opps_arr[$i]->id;
+            $json_obj['opportunity_name'] = $opps_arr[$i]->name;
+            
+             $opps_arr[$i]->load_relationship('accounts');
+                $accountBean = $opps_arr[$i]->accounts->getBeans();
+                $accountBean = array_values($accountBean)[0];
+                // $contactBean = BeanFactory::retrieveBean('Contacts', $leads_arr[$i]['contact_id'], array('disable_row_level_security' => true));
+                $json_obj['account_name'] = $accountBean->name;
+                $json_obj['account_id'] = $accountBean->id;
+               
+                
+             $opps_arr[$i]->load_relationship('contacts');
+             $contactBean = $opps_arr[$i]->contacts->getBeans();
+             if(count($contactBean) > 0){
+                $contactBean = array_values($contactBean)[0];
+                // $contactBean = BeanFactory::retrieveBean('Contacts', $leads_arr[$i]['contact_id'], array('disable_row_level_security' => true));
+                $json_obj['contact_name'] = $contactBean->name;
+                $json_obj['contact_id'] = $contactBean->id;
+                
+          
+             }
+               $json_arr[] = $json_obj;
         }
 
         return $json_arr;
