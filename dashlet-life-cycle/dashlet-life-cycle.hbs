@@ -1,0 +1,59 @@
+ <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+
+        }
+        th, td {
+            padding: 15px;
+        }
+        td {text-align:center}
+        tr:nth-of-type(odd) {
+          background-color:#ccc;
+        }
+    </style>
+
+<div class = "row">
+<ul>
+<table align="center">
+
+
+    {{#if obj.target_id}}
+    <tr>
+        <td>Target</td>
+        <td>{{obj.target_name}}</td>
+    </tr>
+    {{/if}}
+    
+    {{#if obj.lead_id}}
+    <tr>
+        <td>Lead</td>
+        <td>{{obj.lead_name}}</td>
+    </tr>
+    {{/if}}
+
+    {{#if obj.opportunity_id}}
+    <tr>
+        <td>Opportunity</td>
+        <td>{{obj.opportunity_name}}</td>
+    </tr>
+    {{/if}}
+
+    {{#if obj.contact_id}}
+    <tr>
+        <td>Contact</td>
+        <td>{{obj.contact_name}}</td>
+    </tr>
+    {{/if}}
+
+    {{#if obj.account_id}}
+    <tr>
+        <td>Account</td>
+        <td>{{obj.account_name}}</td>
+    </tr>
+    {{/if}}
+
+
+</table>
+</ul>
+</div>
